@@ -581,3 +581,92 @@ nav {
     .map-footer .btn-secondary:last-child:hover {
         background: #475569;
     }
+
+
+
+
+
+
+    
+
+/* ================= MOBILE FIX ================= */
+@media (max-width: 768px) {
+
+    /* NAV */
+    nav {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .cont {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    /* HERO */
+    .hero {
+        padding: 60px 20px;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero-text {
+        font-size: 1rem;
+    }
+
+    /* BUTTONS */
+    .btn-report,
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+    }
+
+    /* STATS */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    /* MAP */
+    .main-map,
+    .big-map,
+    #map {
+        height: 320px;
+    }
+
+    /* FORM */
+    .report_container {
+        padding: 25px;
+        margin: 20px;
+    }
+
+    .coords {
+        flex-direction: column;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+    }
+
+    /* ISSUES LIST */
+    .report-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    /* ADMIN TABLE */
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
