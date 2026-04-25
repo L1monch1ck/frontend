@@ -1,4 +1,5 @@
 const API = "https://backend-5aed.onrender.com";
+
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -10,7 +11,7 @@ async function register() {
 
   const res = await fetch(`${API}/register`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
 
@@ -29,7 +30,7 @@ async function login() {
 
   const res = await fetch(`${API}/login`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
 
@@ -38,10 +39,8 @@ async function login() {
   if (data.message === "Login successful") {
     showMessage("Welcome!", "green");
 
-    // сохраняем пользователя
     localStorage.setItem("user", email);
 
-    // редирект
     setTimeout(() => {
       window.location.href = "index.html";
     }, 1000);

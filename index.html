@@ -84,77 +84,84 @@
         </div>
     </div>
 
-    <script>
-        function logout() {
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
+<script>
+    const API = "https://backend-5aed.onrender.com";
+
+    function logout() {
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+    }
+
+    // Границы карты
+    const campusBounds = L.latLngBounds([2.8078, 101.7570], [2.8164, 101.7596]);
+
+    const map = L.map('map', {
+        maxBounds: campusBounds,
+        maxBoundsViscosity: 1.0,
+        minZoom: 15,
+        maxZoom: 19
+    }).setView([2.8121, 101.7583], 17);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    L.rectangle(campusBounds, {
+        color: "#ef4444",
+        weight: 3,
+        fillOpacity: 0.08
+    }).addTo(map);
+
+    let markers = [];
+
+    async function loadStats() {
+        try {
+            const res = await fetch(`${API}/stats`);
+            const data = await res.json();
+
+            document.getElementById("total").innerText = data.total || 0;
+            document.getElementById("pending").innerText = data.pending || 0;
+            document.getElementById("in_progress").innerText = data.in_progress || 0;
+            document.getElementById("resolved").innerText = data.resolved || 0;
+
+        } catch (err) {
+            console.error("Failed to load stats", err);
         }
+    }
 
-        // Границы карты
-        const campusBounds = L.latLngBounds([2.8078, 101.7570], [2.8164, 101.7596]);
+    async function loadReports() {
+        try {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
 
-        const map = L.map('map', {
-            maxBounds: campusBounds,
-            maxBoundsViscosity: 1.0,
-            minZoom: 15,
-            maxZoom: 19
-        }).setView([2.8121, 101.7583], 17);
+            const res = await fetch(`${API}/reports`);
+            const data = await res.json();
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            data.forEach(r => {
+                const color = r.status === "resolved" ? "#22c55e" : "#ef4444";
 
-        L.rectangle(campusBounds, {
-            color: "#ef4444",
-            weight: 3,
-            fillOpacity: 0.08
-        }).addTo(map);
+                const marker = L.circleMarker([r.lat, r.lng], {
+                    radius: 9,
+                    fillColor: color,
+                    color: "#fff",
+                    weight: 3,
+                    fillOpacity: 0.9
+                }).addTo(map);
 
-        let markers = [];
+                marker.bindPopup(`<b>${r.title}</b><br>Status: ${r.status}`);
+                markers.push(marker);
+            });
 
-        async function loadStats() {
-            try {
-                const res = await fetch("http://127.0.0.1:8000/stats");
-                const data = await res.json();
-
-                document.getElementById("total").innerText = data.total || 0;
-                document.getElementById("pending").innerText = data.pending || 0;
-                document.getElementById("in_progress").innerText = data.in_progress || 0;
-                document.getElementById("resolved").innerText = data.resolved || 0;
-            } catch (err) {
-                console.error("Failed to load stats");
-            }
+        } catch (e) {
+            console.error(e);
         }
+    }
 
-        async function loadReports() {
-            try {
-                markers.forEach(m => map.removeLayer(m));
-                markers = [];
+    loadStats();
+    loadReports();
 
-                const res = await fetch("http://127.0.0.1:8000/reports");
-                const data = await res.json();
-
-                data.forEach(r => {
-                    const color = r.status === "resolved" ? "#22c55e" : "#ef4444";
-                    const marker = L.circleMarker([r.lat, r.lng], {
-                        radius: 9,
-                        fillColor: color,
-                        color: "#fff",
-                        weight: 3,
-                        fillOpacity: 0.9
-                    }).addTo(map);
-
-                    marker.bindPopup(`<b>${r.title}</b><br>Status: ${r.status}`);
-                    markers.push(marker);
-                });
-            } catch (e) { console.error(e); }
-        }
-
+    setInterval(() => {
         loadStats();
         loadReports();
-
-        setInterval(() => {
-            loadStats();
-            loadReports();
-        }, 8000);
-    </script>
+    }, 8000);
+</script>
 </body>
 </html>

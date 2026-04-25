@@ -97,86 +97,89 @@
         </table>
     </div>
 
-    <script>
-        // Защита админки
-        const currentUser = localStorage.getItem("user");
-        if (currentUser !== "inti-campus-smart-admin-panel@gmail.com") {
-            alert("Access Denied! Only administrator can enter this panel.");
-            window.location.href = "index.html";
+<script>
+    const API = "https://backend-5aed.onrender.com";
+
+    // Защита админки
+    const currentUser = localStorage.getItem("user");
+    if (currentUser !== "inti-campus-smart-admin-panel@gmail.com") {
+        alert("Access Denied! Only administrator can enter this panel.");
+        window.location.href = "index.html";
+    }
+
+    function logout() {
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+    }
+
+    async function loadAdminReports() {
+        const tbody = document.getElementById("adminTableBody");
+        tbody.innerHTML = "";
+
+        try {
+            const res = await fetch(`${API}/reports`);
+            const reports = await res.json();
+
+            reports.forEach(report => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td><strong>#${report.id}</strong></td>
+                    <td>${report.title}</td>
+                    <td>${report.description ? report.description.substring(0, 70) + '...' : '-'}</td>
+                    <td>${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}</td>
+                    <td><span class="status-badge status-${report.status}">${report.status}</span></td>
+                    <td>
+                        <button class="btn-action btn-pending" onclick="updateStatus(${report.id}, 'pending')">Pending</button>
+                        <button class="btn-action btn-progress" onclick="updateStatus(${report.id}, 'in_progress')">In Progress</button>
+                        <button class="btn-action btn-resolved" onclick="updateStatus(${report.id}, 'resolved')">Resolved</button>
+                    </td>
+                    <td>
+                        <button class="btn-action btn-delete" onclick="deleteReport(${report.id})">Delete</button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red; padding:30px;">Error loading reports.</td></tr>`;
         }
+    }
 
-        function logout() {
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
-        }
+    async function updateStatus(id, newStatus) {
+        if (!confirm(`Change status to "${newStatus}"?`)) return;
 
-        async function loadAdminReports() {
-            const tbody = document.getElementById("adminTableBody");
-            tbody.innerHTML = "";
+        try {
+            const res = await fetch(`${API}/report/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: newStatus })
+            });
 
-            try {
-                const res = await fetch("http://127.0.0.1:8000/reports");
-                const reports = await res.json();
-
-                reports.forEach(report => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td><strong>#${report.id}</strong></td>
-                        <td>${report.title}</td>
-                        <td>${report.description ? report.description.substring(0, 70) + '...' : '-'}</td>
-                        <td>${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}</td>
-                        <td><span class="status-badge status-${report.status}">${report.status}</span></td>
-                        <td>
-                            <button class="btn-action btn-pending" onclick="updateStatus(${report.id}, 'pending')">Pending</button>
-                            <button class="btn-action btn-progress" onclick="updateStatus(${report.id}, 'in_progress')">In Progress</button>
-                            <button class="btn-action btn-resolved" onclick="updateStatus(${report.id}, 'resolved')">Resolved</button>
-                        </td>
-                        <td>
-                            <button class="btn-action btn-delete" onclick="deleteReport(${report.id})">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (err) {
-                console.error(err);
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red; padding:30px;">Error loading reports. Make sure backend is running.</td></tr>`;
-            }
-        }
-
-        // Обновление статуса (используем PUT как в твоём FastAPI)
-        async function updateStatus(id, newStatus) {
-            if (!confirm(`Change status to "${newStatus}"?`)) return;
-
-            try {
-                const res = await fetch(`http://127.0.0.1:8000/report/${id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ status: newStatus })
-                });
-
-                if (res.ok) {
-                    loadAdminReports();
-                } else {
-                    alert("Failed to update status");
-                }
-            } catch (err) {
-                alert("Server error");
-            }
-        }
-
-        async function deleteReport(id) {
-            if (!confirm("Delete this report permanently?")) return;
-
-            try {
-                await fetch(`http://127.0.0.1:8000/report/${id}`, { method: "DELETE" });
+            if (res.ok) {
                 loadAdminReports();
-            } catch (err) {
-                alert("Failed to delete");
+            } else {
+                alert("Failed to update status");
             }
+        } catch (err) {
+            alert("Server error");
         }
+    }
 
-        // Загрузка при открытии
-        loadAdminReports();
-    </script>
+    async function deleteReport(id) {
+        if (!confirm("Delete this report permanently?")) return;
+
+        try {
+            await fetch(`${API}/report/${id}`, { method: "DELETE" });
+            loadAdminReports();
+        } catch (err) {
+            alert("Failed to delete");
+        }
+    }
+
+    loadAdminReports();
+</script>
 </body>
 </html>
