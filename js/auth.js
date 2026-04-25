@@ -1,5 +1,4 @@
-const API = "http://127.0.0.1:8000";
-
+const API = "https://backend-5aed.onrender.com";
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;

@@ -1,3 +1,6 @@
+const API = "https://backend-5aed.onrender.com";
+
+
 document.getElementById("reportForm").onsubmit = async (e) => {
   e.preventDefault();
 
@@ -8,7 +11,7 @@ document.getElementById("reportForm").onsubmit = async (e) => {
     lng: 101.6869
   };
 
-  await fetch("http://127.0.0.1:8000/report", {
+  await fetch(`${API}/report`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify(data)

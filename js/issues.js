@@ -1,21 +1,28 @@
+// ====================== MAP INIT ======================
 var map = L.map('map', {
     zoomControl: true,
-    attributionControl: true
+    attributionControl: false
 }).setView([3.1390, 101.6869], 16);
 
+// ====================== TILE ======================
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: ''
 }).addTo(map);
 
-// Красивая кастомизация маркеров
+// ====================== API ======================
+const API = "https://backend-5aed.onrender.com";
+
+// ====================== MARKERS ======================
 let markers = [];
 
+// ====================== LOAD REPORTS ======================
 function loadReports(filter = "all") {
+    // удаляем старые маркеры
     markers.forEach(m => map.removeLayer(m));
     markers = [];
 
-    fetch("http://127.0.0.1:8000/reports")
+    fetch(`${API}/reports`)
         .then(res => res.json())
         .then(data => {
             data.forEach(r => {
@@ -37,10 +44,7 @@ function loadReports(filter = "all") {
                     ${r.description || ''}<br><br>
                     <strong>Status:</strong> 
                     <span style="color:${color}">${r.status}</span>
-                `, {
-                    closeButton: true,
-                    className: 'custom-popup'
-                });
+                `);
 
                 markers.push(marker);
             });
@@ -48,13 +52,16 @@ function loadReports(filter = "all") {
         .catch(err => console.error("Error loading reports:", err));
 }
 
-// Загрузка при старте
-loadReports();
-
-// Активация кнопок фильтра
+// ====================== FILTER BUTTONS ======================
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+        loadReports(filter);
     });
-});     
+});
+
+// ====================== INIT ======================
+loadReports();

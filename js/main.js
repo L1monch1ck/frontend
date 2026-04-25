@@ -15,13 +15,17 @@ L.circle([3.1390, 101.6869], {
     radius: 400
 }).addTo(map);
 
+
+const API = "https://backend-5aed.onrender.com";
+
+
 // Массив маркеров
 let markers = [];
 
 // Загрузка всех отчётов
 async function loadReports() {
     try {
-        const res = await fetch("http://127.0.0.1:8000/reports");
+        const res = await fetch("`${API}/reports`");
         const data = await res.json();
 
         // Удаляем старые маркеры
